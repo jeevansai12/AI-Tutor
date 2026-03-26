@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — AI Tutor{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem;">
+    👋 Hello, {{ user.username }}!
+</h1>
+<p class="text-muted" style="margin-bottom: 2rem;">Your AI Tutor dashboard.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <a href="{% url 'quiz_select' %}" class="card" style="text-decoration: none; text-align: center;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor=''">
+        <div style="font-size: 2rem;">📝</div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">Take Quiz</h3>
+    </a>
+    <a href="{% url 'chat' %}" class="card" style="text-decoration: none; text-align: center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size: 2rem;">🤖</div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">AI Tutor</h3>
+    </a>
+    <a href="{% url 'flashcard_select' %}" class="card" style="text-decoration: none; text-align: center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size: 2rem;">🗂️</div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">Flashcards</h3>
+    </a>
+    <a href="{% url 'generate_notes' %}" class="card" style="text-decoration: none; text-align: center;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
+        <div style="font-size: 2rem;">📄</div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">Generate Notes</h3>
+    </a>
+</div>
+
+{% if latest %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">Latest Result</h2>
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Subject</span>
+            <p style="font-weight: 600;">{{ latest.subject|title }}</p>
+        </div>
+        <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Score</span>
+            <p style="font-weight: 600; color: {% if latest.score >= 70 %}var(--success){% elif latest.score >= 40 %}var(--warning){% else %}var(--error){% endif %};">{{ latest.score }}%</p>
+        </div>
+        <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Level</span>
+            <p style="font-weight: 600;">{{ latest.level }}</p>
+        </div>
+    </div>
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+        <span class="text-muted" style="font-size: 0.8rem; display: block; margin-bottom: 0.3rem;">💡 AI Recommendation</span>
+        <p style="font-size: 0.95rem; color: var(--text-primary);">{{ latest.recommendation }}</p>
+    </div>
+</div>
+{% endif %}
+
+{% if results %}
+<div class="card">
+    <h2 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">Quiz History</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border);">
+                <th style="text-align: left; padding: 0.6rem 0; color: var(--text-muted); font-weight: 600;">Subject</th>
+                <th style="text-align: left; padding: 0.6rem 0; color: var(--text-muted); font-weight: 600;">Score</th>
+                <th style="text-align: left; padding: 0.6rem 0; color: var(--text-muted); font-weight: 600;">Level</th>
+                <th style="text-align: left; padding: 0.6rem 0; color: var(--text-muted); font-weight: 600;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.6rem 0;">{{ r.subject|title }}</td>
+                <td style="padding: 0.6rem 0; font-weight: 600; color: {% if r.score >= 70 %}var(--success){% elif r.score >= 40 %}var(--warning){% else %}var(--error){% endif %};">{{ r.score }}%</td>
+                <td style="padding: 0.6rem 0;">{{ r.level }}</td>
+                <td style="padding: 0.6rem 0; color: var(--text-muted);">{{ r.date_taken|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <p class="text-muted">No quizzes taken yet. <a href="{% url 'quiz_select' %}">Take your first quiz!</a></p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ subject_display }} Quiz — AI Tutor{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem;">{{ subject_display }} Quiz</h1>
+<p class="text-muted" style="margin-bottom: 2rem;">Answer all questions and submit.</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    {% for q in questions %}
+    <div class="card" style="margin-bottom: 1rem;">
+        <p style="font-weight: 600; margin-bottom: 1rem;">
+            <span style="color: var(--accent);">Q{{ forloop.counter }}.</span> {{ q.text }}
+        </p>
+
+        <label style="display: block; padding: 0.5rem 0.75rem; border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='rgba(139, 92, 246, 0.08)'" onmouseout="this.style.background=''">
+            <input type="radio" name="question_{{ q.id }}" value="A" required style="margin-right: 0.5rem;"> {{ q.option_a }}
+        </label>
+        <label style="display: block; padding: 0.5rem 0.75rem; border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='rgba(139, 92, 246, 0.08)'" onmouseout="this.style.background=''">
+            <input type="radio" name="question_{{ q.id }}" value="B" style="margin-right: 0.5rem;"> {{ q.option_b }}
+        </label>
+        <label style="display: block; padding: 0.5rem 0.75rem; border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='rgba(139, 92, 246, 0.08)'" onmouseout="this.style.background=''">
+            <input type="radio" name="question_{{ q.id }}" value="C" style="margin-right: 0.5rem;"> {{ q.option_c }}
+        </label>
+        <label style="display: block; padding: 0.5rem 0.75rem; border-radius: 8px; margin-bottom: 0.4rem; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='rgba(139, 92, 246, 0.08)'" onmouseout="this.style.background=''">
+            <input type="radio" name="question_{{ q.id }}" value="D" style="margin-right: 0.5rem;"> {{ q.option_d }}
+        </label>
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Submit Quiz</button>
+</form>
+{% endblock %}

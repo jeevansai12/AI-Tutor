@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Result — AI Tutor{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 2rem auto; text-align: center;">
+    <div class="card">
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Quiz Result</h1>
+
+        <div style="font-size: 3rem; font-weight: 700; color: {% if result.score >= 70 %}var(--success){% elif result.score >= 40 %}var(--warning){% else %}var(--error){% endif %}; margin-bottom: 0.5rem;">
+            {{ result.score }}%
+        </div>
+
+        <p style="font-size: 1rem; margin-bottom: 1.5rem;">
+            You got <strong>{{ result.correct_answers }}</strong> out of <strong>{{ result.total_questions }}</strong> correct.
+        </p>
+
+        <table style="width: 100%; text-align: left; border-collapse: collapse; margin-bottom: 1.5rem;">
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.6rem 0; color: var(--text-muted);">Subject</td>
+                <td style="padding: 0.6rem 0; font-weight: 600;">{{ result.subject|title }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.6rem 0; color: var(--text-muted);">Level</td>
+                <td style="padding: 0.6rem 0; font-weight: 600;">{{ result.level }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 0.6rem 0; color: var(--text-muted);">Date</td>
+                <td style="padding: 0.6rem 0; font-weight: 600;">{{ result.date_taken|date:"d M Y, h:i A" }}</td>
+            </tr>
+        </table>
+
+        <div style="background: rgba(139, 92, 246, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(139, 92, 246, 0.2); text-align: left;">
+            <div style="font-size: 0.85rem; color: var(--accent); font-weight: 600; margin-bottom: 0.3rem;">💡 Next Steps</div>
+            <div style="color: var(--text-primary); font-size: 0.95rem;">{{ result.recommendation }}</div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'quiz_select' %}" class="btn btn-primary">Take Another Quiz</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline">Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

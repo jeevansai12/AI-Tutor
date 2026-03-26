@@ -1,0 +1,14 @@
+{% extends "admin/index.html" %}
+
+{% block sidebar %}
+    {{ block.super }}
+    <div class="module" id="ml-module">
+        <h2>AI Tutor Machine Learning</h2>
+        <div style="padding: 10px;">
+            <p style="margin-bottom: 10px; color: #666; font-size: 12px;">Ensure your Random Forest classification model is up to date.</p>
+            <a href="{% url 'admin_ml_train' %}" class="button" style="display: block; text-align: center; padding: 10px; font-weight: bold; background-color: #417690; color: white;">
+                Retrain Random Forest Model
+            </a>
+        </div>
+    </div>
+{% endblock %}

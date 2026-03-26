@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Tutor — Chat{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 65vh;
+        max-height: 800px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .chat-history {
+        flex-grow: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .message {
+        max-width: 80%;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        line-height: 1.5;
+        font-size: 0.95rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-user {
+        align-self: flex-end;
+        background: var(--accent);
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .msg-ai {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        border-bottom-left-radius: 4px;
+    }
+
+    .msg-ai pre {
+        background: #000;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin-top: 0.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .msg-ai code {
+        font-family: monospace;
+        color: #e2e8f0;
+    }
+
+    .chat-input-area {
+        padding: 1rem 1.5rem;
+        background: rgba(0,0,0,0.2);
+        border-top: 1px solid var(--border);
+    }
+
+    .chat-form {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .chat-input {
+        flex-grow: 1;
+        padding: 0.85rem 1rem;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+        border-color: var(--accent);
+    }
+
+    .chat-submit {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0 1.5rem;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .chat-submit:hover {
+        background: var(--accent-hover);
+    }
+
+    .typing-indicator {
+        font-style: italic;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        display: none;
+        padding: 0.5rem 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+    <div>
+        <h1 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem;">🤖 AI Tutor</h1>
+        <p class="text-muted">Ask anything about CS subjects.</p>
+    </div>
+    
+    {% if has_key %}
+        <div style="display: flex; gap: 0.5rem;">
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" name="clear_chat" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Clear Chat</button>
+            </form>
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" name="clear_key" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; color: var(--error); border-color: rgba(239,68,68,0.3);">Remove API Key</button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+
+{% if not has_key %}
+<div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 3rem 2rem;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">🔑</div>
+    <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Gemini API Key Required</h2>
+    <p class="text-muted" style="margin-bottom: 2rem;">
+        To chat with the AI Tutor, please provide your Google Gemini API key. 
+        It is stored safely only in your current browser session.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group" style="text-align: left;">
+            <input type="password" name="api_key" placeholder="AIzA..." required style="text-align: center;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save & Start Chatting</button>
+    </form>
+    
+    <p style="margin-top: 1.5rem; font-size: 0.85rem;">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank">Get a free API key here ↗</a>
+    </p>
+</div>
+
+{% else %}
+<div class="chat-container">
+    <div class="chat-history" id="chatHistory">
+        {% if not chat_history %}
+            <div style="text-align: center; color: var(--text-muted); margin-top: auto; margin-bottom: auto;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎓</div>
+                <p>Hello! I'm your AI Tutor.</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem;">Ask me to explain a concept or give an example.</p>
+            </div>
+        {% else %}
+            {% for msg in chat_history %}
+                {% if msg.role == 'user' %}
+                    <div class="message msg-user">{{ msg.text }}</div>
+                {% else %}
+                    <div class="message msg-ai">{{ msg.text|linebreaks }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+        AI Tutor is thinking...
+    </div>
+
+    <div class="chat-input-area">
+        <form method="POST" class="chat-form" id="chatForm" onsubmit="document.getElementById('typingIndicator').style.display='block'; window.scrollTo(0,document.body.scrollHeight);">
+            {% csrf_token %}
+            <input type="text" name="user_msg" class="chat-input" placeholder="Type your question..." required autocomplete="off" autofocus>
+            <button type="submit" class="chat-submit">Send</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+    // Auto-scroll chat to bottom
+    const historyDiv = document.getElementById('chatHistory');
+    if (historyDiv) {
+        historyDiv.scrollTop = historyDiv.scrollHeight;
+    }
+</script>
+{% endblock %}
+{% endblock %}
