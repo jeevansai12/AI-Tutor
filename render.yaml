@@ -3,10 +3,11 @@ services:
     name: ai-tutor
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn aitutor.wsgi:application"
-
+    startCommand: "./start.sh"
     envVars:
       - key: DEBUG
         value: "False"
       - key: PYTHON_VERSION
-        value: "3.9.0"
+        value: "3.11"
+
+
